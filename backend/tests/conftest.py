@@ -2,12 +2,14 @@ import sys
 import os
 import tempfile
 import pytest
+from unittest.mock import MagicMock
 
 # Add backend directory to Python path so tests can import backend modules
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from models import Course, Lesson, CourseChunk
 from vector_store import VectorStore, SearchResults
+from config import Config
 
 
 @pytest.fixture
@@ -47,6 +49,32 @@ def mock_search_results():
         documents=["MCP stands for Model Context Protocol. It enables AI models to interact with tools."],
         metadata=[{"course_title": "Introduction to MCP", "lesson_number": 1}],
         distances=[0.1],
+    )
+
+
+@pytest.fixture
+def mock_rag_system():
+    """A fully-mocked RAGSystem usable across all test files."""
+    mock = MagicMock()
+    mock.session_manager.create_session.return_value = "test-session-id"
+    mock.query.return_value = (
+        "Test answer.",
+        [{"text": "Source text", "url": "https://example.com/1"}],
+    )
+    mock.get_course_analytics.return_value = {
+        "total_courses": 2,
+        "course_titles": ["Course A", "Course B"],
+    }
+    return mock
+
+
+@pytest.fixture
+def test_config(tmp_path):
+    """A Config instance suitable for unit/integration tests."""
+    return Config(
+        MAX_RESULTS=5,
+        CHROMA_PATH=str(tmp_path / "chroma"),
+        ANTHROPIC_API_KEY="test-key",
     )
 
 
