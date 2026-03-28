@@ -5,7 +5,7 @@ const API_URL = '/api';
 let currentSessionId = null;
 
 // DOM elements
-let chatMessages, chatInput, sendButton, totalCourses, courseTitles, newChatButton;
+let chatMessages, chatInput, sendButton, totalCourses, courseTitles, newChatButton, themeToggle;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,8 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
   totalCourses = document.getElementById('totalCourses');
   courseTitles = document.getElementById('courseTitles');
   newChatButton = document.getElementById('newChatButton');
+  themeToggle = document.getElementById('themeToggle');
 
   setupEventListeners();
+  applyStoredTheme();
   createNewSession();
   loadCourseStats();
 });
@@ -33,6 +35,9 @@ function setupEventListeners() {
   // New chat button
   newChatButton.addEventListener('click', createNewSession);
 
+  // Theme toggle
+  themeToggle.addEventListener('click', toggleTheme);
+
   // Suggested questions
   document.querySelectorAll('.suggested-item').forEach((button) => {
     button.addEventListener('click', (e) => {
@@ -41,6 +46,33 @@ function setupEventListeners() {
       sendMessage();
     });
   });
+}
+
+// Theme Functions
+function applyStoredTheme() {
+  const stored = localStorage.getItem('theme');
+  if (stored === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    updateThemeIcons(true);
+  }
+}
+
+function toggleTheme() {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  if (isLight) {
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('theme', 'dark');
+    updateThemeIcons(false);
+  } else {
+    document.documentElement.setAttribute('data-theme', 'light');
+    localStorage.setItem('theme', 'light');
+    updateThemeIcons(true);
+  }
+}
+
+function updateThemeIcons(isLight) {
+  themeToggle.querySelector('.icon-moon').style.display = isLight ? 'none' : '';
+  themeToggle.querySelector('.icon-sun').style.display = isLight ? '' : 'none';
 }
 
 // Chat Functions
